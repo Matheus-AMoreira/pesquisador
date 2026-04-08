@@ -1,18 +1,42 @@
 <!doctype html>
-<html lang="pt-br">
+<html lang="pt-BR">
     <head>
         <meta charset="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/src/style.css" />
         <title>Chat APP</title>
     </head>
     <body>
-        <h1>Chat with IA</h1>
-        <ul id="chat"></ul>
-        <div>
-            <input id="text-box" />
-            <button type="button" onclick="sendMessage()">Enviar</button>
+        <div class="main">
+            <header class="header">
+                <h1>Chat with IA</h1>
+            </header>
+
+            <div class="chat-area">
+                <ul id="chat"></ul>
+            </div>
+
+            <footer class="input-area">
+                <div class="input-container">
+                    <input
+                        id="text-box"
+                        type="text"
+                        placeholder="Digite sua mensagem..."
+                        autocomplete="off"
+                    />
+                    <button
+                        type="button"
+                        onclick="sendUserMessage()"
+                        id="send-btn"
+                        class="send-btn"
+                    >
+                        Enviar
+                    </button>
+                </div>
+            </footer>
         </div>
+
         <script type="module" src="/src/main.js"></script>
     </body>
 </html>

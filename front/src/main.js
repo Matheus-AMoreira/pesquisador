@@ -1,41 +1,75 @@
-import "./style.css";
+import { chatApp } from "./socket";
 
-const ws = "ws://localhost:8000/chat";
+const chat = document.getElementById("chat");
+const textInput = document.getElementById("text-box");
 
-let socket = new WebSocket(ws);
-
-socket.onopen = (event) => {
-  console.log("Conectado ao servidor FastAPI!");
-};
-
-socket.onmessage = (event) => {
-  console.log("Mensagem do servidor:", event.data);
-  const chat = document.getElementById("chat");
-  const message = document.createElement("li");
-  const content = document.createTextNode(event.data);
-  message.appendChild(content);
-  chat.appendChild(message);
-};
-
-socket.onerror = (error) => {
-  console.error("Erro no WebSocket:", error);
-  socket = new WebSocket(ws);
-};
-
-socket.onclose = (event) => {
-  console.log("Conexão encerrada.");
-};
-
-function sendMessage() {
-  const text = document.getElementById("text-box");
-  console.log("tipo: " + text.type);
-  console.log("enviando " + text.value);
-  if (socket.readyState === WebSocket.OPEN) {
-    socket.send(text.value);
-    text.value = "";
-  } else {
-    console.warn("O socket não está aberto.");
+textInput.addEventListener("keypress", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    sendUserMessage();
   }
+});
+
+window.sendUserMessage = function sendUserMessage() {
+  const text = textInput.value;
+
+  if (text !== "") {
+    chatApp.send(text);
+
+    if (!text.trim()) return;
+    createMessageElement(true, text);
+
+    textInput.value = "";
+  }
+};
+
+window.receiveBotMessage = function receiveBotMessage(content) {
+  createMessageElement(false, content);
+  scrollToBottom();
+};
+
+function createMessageElement(user = false, content = "") {
+  if (!chat) return;
+
+  const message = document.createElement("li");
+  message.setAttribute("class", user ? "user" : "bot");
+  message.setAttribute("data-role", user ? "user" : "bot");
+
+  // Avatar
+  const avatar = document.createElement("div");
+  avatar.classList.add("avatar");
+  avatar.classList.add(user ? "avatar-user" : "avatar-bot");
+  avatar.innerHTML = user ? "👤" : "🤖";
+
+  // Conteúdo da mensagem
+  const messageContent = document.createElement("div");
+  messageContent.classList.add("message-content");
+
+  // Timestamp
+  const timestamp = document.createElement("span");
+  timestamp.classList.add("timestamp");
+  timestamp.textContent = new Date().toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  // Texto do conteúdo
+  const contentSpan = document.createElement("span");
+  contentSpan.classList.add("content");
+  contentSpan.textContent = content;
+
+  messageContent.appendChild(timestamp);
+  messageContent.appendChild(contentSpan);
+  message.appendChild(avatar);
+  message.appendChild(messageContent);
+  chat.appendChild(message);
+
+  return message;
 }
 
-window.sendMessage = sendMessage;
+function scrollToBottom() {
+  const chatArea = chat;
+  if (chatArea) {
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }
+}
